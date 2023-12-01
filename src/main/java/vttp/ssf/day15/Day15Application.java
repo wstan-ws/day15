@@ -1,18 +1,11 @@
 package vttp.ssf.day15;
 
-import java.time.Duration;
-import java.util.LinkedList;
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.data.redis.core.HashOperations;
-import org.springframework.data.redis.core.ListOperations;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
 
 @SpringBootApplication
 public class Day15Application implements CommandLineRunner {
@@ -70,12 +63,14 @@ public class Day15Application implements CommandLineRunner {
 		// String item = opsList.index("fred_cart", 1);
 		// System.out.printf(">>>> item[1]: %s\n", item);
 
-		// Map
+		// // Map
 		// HashOperations<String, String, String> opsHash = template.opsForHash();
 		// opsHash.put("c001", "name", "fred");
 		// opsHash.put("c001", "email", "fred@gmail.com");
 		// opsHash.put("c002", "name", "barney");
 		// opsHash.put("c002", "email", "barney@gmail.com");
+		// Map<String, String> map = opsHash.entries("c001");
+		// System.out.printf(">>> %s\n", map);
 
 		// String empName = opsHash.get("c001", "name");
 		// System.out.printf(">>> empName: %s\n", empName);

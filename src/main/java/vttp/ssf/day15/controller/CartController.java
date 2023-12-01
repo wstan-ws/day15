@@ -1,14 +1,12 @@
 package vttp.ssf.day15.controller;
 
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.data.redis.core.HashOperations;
-import org.springframework.data.redis.core.ListOperations;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -21,27 +19,35 @@ import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import vttp.ssf.day15.Utils;
 import vttp.ssf.day15.model.Item;
-import vttp.ssf.day15.repo.CartRepository;
+import vttp.ssf.day15.services.CartService;
 
 @Controller
 @RequestMapping("/cart")
 public class CartController {
 
+    private Logger logger = Logger.getLogger(CartController.class.getName());
+
     @Autowired
-    private CartRepository cartRepo;
+    private CartService cartSvc;
 
     @GetMapping
-    public String getCart(@RequestParam String name) {
+    public String getCart(@RequestParam String name, Model model, HttpSession sess) {
 
-        if (cartRepo.hasCart(name)) {
-            
-        } 
+        List<Item> cart = cartSvc.getCart(name);
+
+        logger.info("CART: %s - %s\n".formatted(name, cart));
+
+        sess.setAttribute("cart", cart);
+
+        model.addAttribute("item", new Item());
+        model.addAttribute("cart", cart);
+        model.addAttribute("username", name);
 
         return "cart";
     }
     
     @PostMapping
-    public ModelAndView postCart(@Valid @ModelAttribute Item item, BindingResult result, HttpSession sess) {
+    public ModelAndView postCart(@Valid @ModelAttribute Item item, BindingResult result, @RequestParam String username, HttpSession sess) {
 
         System.out.printf("item: %s\n", item);
         System.out.printf("error: %b\n", result.hasErrors());
@@ -58,23 +64,27 @@ public class CartController {
 
         mav.addObject("item", new Item());
         mav.addObject("cart", cart);
+        mav.addObject("username", username);
         mav.setStatus(HttpStatusCode.valueOf(200));
+
         return mav;
     }
 
     @PostMapping ("/checkout")
-    public ModelAndView postCartCheckout(HttpSession sess) {
+    public String postCartCheckout(@RequestParam String username, HttpSession sess) {
 
-        ModelAndView mav = new ModelAndView("cart");
+        // ModelAndView mav = new ModelAndView("cart");
 
         List<Item> cart = Utils.getCart(sess);
         System.out.printf("Checkout cart: %s\n", cart);
 
+        cartSvc.saveCart(username, cart);
+
         sess.invalidate();
 
-        mav.addObject("item", new Item());
-        mav.setStatus(HttpStatusCode.valueOf(200));
+        // mav.addObject("item", new Item());
+        // mav.setStatus(HttpStatusCode.valueOf(200));
 
-        return mav;
+        return "redirect:/index.html";
     }
 }
